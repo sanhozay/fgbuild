@@ -18,6 +18,7 @@ you should only use it if you understand what it does.
 Usage
 -----
 
+<pre>
 fgbuild [OPTIONS]
 
  -c        cleans the build directories before building
@@ -27,6 +28,7 @@ fgbuild [OPTIONS]
  -l        builds with address sanitizer for leak checking.
  -u        update from current state of next (not compatible with -d)
  -h        show usage message
+</pre>
 
 If the -j option is not supplied, the build will run with as many threads as
 you have processors or cores.
@@ -41,27 +43,37 @@ Examples
 
 A typical build to update from the latest sources (flightgear + simgear):
 
+<pre>
 $ fgbuild -u
 fgbuild: 08:10:42: Updating from remote
 fgbuild: 08:10:46: Building simgear
 fgbuild: 08:10:59: Building flightgear
 fgbuild: 08:11:13: Build complete
+</pre>
 
 The output from the build goes into $FG_HOME/fgbuild.log.
 
 To update from the latest sources and compile everything from scratch:
 
+<pre>
 $ fgbuild -cu
+</pre>
 
 To clean and build with debug symbols (to run with gdb for crash reporting):
 
+<pre>
 $ fgbuild -cg
+</pre>
 
 To clean and build Flightgear as it existed on a given date (for bisection):
 
+<pre>
 $ fgbuild -cd Jan 1 2015
+</pre>
 
 To build with address sanitizer for checking leaks:
 
+<pre>
 $ fgbuild -cl
+</pre>
 
