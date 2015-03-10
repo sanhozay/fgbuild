@@ -68,7 +68,7 @@ $ fgbuild -cg
 To clean and build Flightgear as it existed on a given date (for bisection):
 
 <pre>
-$ fgbuild -cd Jan 1 2015
+$ fgbuild -cd 'Jan 1 2015'
 </pre>
 
 To build with address sanitizer for checking leaks and debug symbols:
