@@ -64,13 +64,13 @@ function build() {
         LINK_FLAGS="-O3"
     fi
     cmake "$1" \
-	    -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_FLAGS="$COMP_FLAGS" \
         -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-	    -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
     check_status
     make -j$JOBS VERBOSE=0 install &> "$LOG"
     check_status
@@ -80,13 +80,13 @@ function build_with_leak_checking() {
     COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g -pthread"
     LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g"
     cmake "$1" \
-	    -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_FLAGS="$COMP_FLAGS" \
         -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-	    -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
     check_status
     make -j$JOBS VERBOSE=1 install &> "$LOG"
     check_status
@@ -186,7 +186,7 @@ fi
 
 if [ $CLEAN -ne 0 ]; then
     log "Cleaning build directories"
-	rm -rf $SG_BUILD $FG_BUILD
+    rm -rf $SG_BUILD $FG_BUILD
 fi
 
 ################################################################################
