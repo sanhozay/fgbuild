@@ -29,15 +29,18 @@
 # -h        show usage message
 #
 # Directories containing simgear and flightgear source
-export SG=$FG_HOME/simgear
-export FG=$FG_HOME/flightgear
+export SG=$FG_SRC/simgear
+export FG=$FG_SRC/flightgear
 
 # Build directories for simgear and flightgear
-export SG_BUILD=$FG_HOME/build/simgear
-export FG_BUILD=$FG_HOME/build/flightgear
+export SG_BUILD=$FG_SRC/build/simgear
+export FG_BUILD=$FG_SRC/build/flightgear
+
+# Installation directory
+export FG_INSTALL=$FG_SRC/install
 
 # Log file for build output
-export LOG=$FG_HOME/fgbuild.log
+export LOG=$FG_SRC/fgbuild.log
 
 ################################################################################
 # FUNCTIONS
@@ -70,7 +73,7 @@ function build() {
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &> "$LOG"
     check_status
     make -j$JOBS VERBOSE=0 install &> "$LOG"
     check_status
@@ -91,7 +94,7 @@ function build_with_leak_checking() {
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &> "$LOG"
     check_status
     make -j$JOBS VERBOSE=1 install &> "$LOG"
     check_status
@@ -114,25 +117,38 @@ function usage() {
     echo -e "  -l     \tbuild with leak checking"
     echo -e "  -u     \tupdate before building (cannot be used with -d)"
     echo -e "  -h     \tshow help"
+    echo ''
+    detailed_usage
+}
+
+function detailed_usage() {
+    echo 'To use this script, create an environment variable called FG_SRC'
+    echo 'that points to the directory containing your flightgear and'
+    echo 'simgear source folders. Add it to your .profile or .bashrc file.'
+    echo ''
+    echo 'For example:'
+    echo 'export FG_SRC=$HOME/Flightgear'
+    echo ''
+    echo 'You must have write access to this directory because this build'
+    echo 'script will create a build directory inside it and write a log'
+    echo 'file to it during the build.'
+    echo ''
+    echo 'Flightgear will be built into $FG_SRC/install and the bin directory'
+    echo 'therein will contain the fgfs executable. You may want to add this'
+    echo 'bin directory to your path and the shared libraries to your library'
+    echo 'path:'
+    echo 'export PATH=$PATH:$FG_SRC/install/bin'
+    echo 'export LD_LIBRARY_PATH=$FG_SRC/install/lib/x86_64-linux-gnu/'
 }
 
 ################################################################################
 # COMMAND LINE OPTIONS
 ################################################################################
 
-if [ ! $FG_HOME ]; then
-    echo 'To use this script, create an environment variable called FG_HOME'
-    echo 'that points to the directory containing your flightgear and'
-    echo 'simgear source folders. Add it to your .profile or .bashrc file.'
+if [ ! $FG_SRC ]; then
+    detailed_usage
     echo ''
-    echo 'For example:'
-    echo 'export FG_HOME=$HOME/Flightgear'
-    echo ''
-    echo 'You must have write access to this directory because this build'
-    echo 'script will create a build directory inside it and write a log'
-    echo 'file to it during the build.'
-    echo ''
-    die 'FG_HOME is not defined, aborting'
+    die 'FG_SRC is not defined, aborting'
 fi
 
 # Parse and validate command line options

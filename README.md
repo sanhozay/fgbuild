@@ -51,7 +51,7 @@ fgbuild: 08:10:59: Building flightgear
 fgbuild: 08:11:13: Build complete
 </pre>
 
-The output from the build goes into $FG_HOME/fgbuild.log.
+The output from the build goes into $FG_SRC/fgbuild.log.
 
 To update from the latest sources and compile everything from scratch:
 
