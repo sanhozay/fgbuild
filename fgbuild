@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2015, Richard Senior
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Flightgear Build
+# 
+# Usage: ./build [OPTIONS]
+#
+# Options:
+# -c        cleans the build directories before building
+# -d DATE   build from DATE (MMM d YYYY)
+# -g        build with debug symbols
+# -j N      builds with N parallel jobs
+# -l        builds with address sanitizer for leak checking.
+# -u        update from current state of next (not compatible with -d)
+# -h        show usage message
+#
+# Directories containing simgear and flightgear source
+export SG=$FG_HOME/simgear
+export FG=$FG_HOME/flightgear
+
+# Build directories for simgear and flightgear
+export SG_BUILD=$FG_HOME/build/simgear
+export FG_BUILD=$FG_HOME/build/flightgear
+
+# Log file for build output
+export LOG=$FG_HOME/fgbuild.log
+
+################################################################################
+# FUNCTIONS
+################################################################################
+
+function die() {
+    echo "$(basename $0): $1"
+    exit 1
+}
+
+function log() {
+    echo "$(basename $0): $(date +%T): $1"
+    if [ $2 ]; then
+        notify-send --icon $FG/icons/flightgear.ico "$1"    
+    fi
+}
+
+function build() {
+    if [ $DEBUG -ne 0 ]; then
+        COMP_FLAGS="-O3 -g"
+        LINK_FLAGS="-O3 -g"
+    else
+        COMP_FLAGS="-O3"
+        LINK_FLAGS="-O3"
+    fi
+    cmake "$1" \
+	    -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_FLAGS="$COMP_FLAGS" \
+        -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
+        -DCMAKE_VERBOSE_MAKEFILE=1 \
+        -DSIMGEAR_SHARED=ON \
+	    -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+    check_status
+    make -j$JOBS VERBOSE=0 install &> "$LOG"
+    check_status
+}
+
+function build_with_leak_checking() {
+    COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g -pthread"
+    LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g"
+    cmake "$1" \
+	    -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_FLAGS="$COMP_FLAGS" \
+        -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
+        -DCMAKE_VERBOSE_MAKEFILE=1 \
+        -DSIMGEAR_SHARED=ON \
+	    -DCMAKE_INSTALL_PREFIX:PATH="$FGFS_INSTALL" &> "$LOG"
+    check_status
+    make -j$JOBS VERBOSE=1 install &> "$LOG"
+    check_status
+}
+
+function check_status() {
+    if [ $? -ne 0 ]; then 
+        log 'Build failed'
+        exit $? 
+    fi
+}
+
+function usage() {
+    JOBS=$(lscpu | awk '/^CPU\(s\)/ {print $2}')
+    echo "Usage: $(basename $0) [OPTIONS]"
+    echo -e "  -c     \tclean before building"
+    echo -e "  -g     \tbuild with debug symbols"
+    echo -e "  -d DATE\tbuild snapshot from DATE (format YYYYMMDD)"
+    echo -e "  -j N   \trun N parallel jobs (default $JOBS)"
+    echo -e "  -l     \tbuild with leak checking"
+    echo -e "  -u     \tupdate before building (cannot be used with -d)"
+    echo -e "  -h     \tshow help"
+}
+
+################################################################################
+# COMMAND LINE OPTIONS
+################################################################################
+
+if [ ! $FG_HOME ]; then
+    echo 'To use this script, create an environment variable called FG_HOME'
+    echo 'that points to the directory containing your flightgear and'
+    echo 'simgear source folders. Add it to your .profile or .bashrc file.'
+    echo ''
+    echo 'For example:'
+    echo 'export FG_HOME=$HOME/Flightgear'
+    echo ''
+    echo 'You must have write access to this directory because this build'
+    echo 'script will create a build directory inside it and write a log'
+    echo 'file to it during the build.'
+    echo ''
+    die 'FG_HOME is not defined, aborting'
+fi
+
+# Parse and validate command line options
+
+CLEAN=0
+DEBUG=0
+LEAK_CHECK=0
+JOBS=$(lscpu | awk '/^CPU\(s\)/ {print $2}')
+UPDATE=0
+
+set -- $(getopt cghulj:d: "$@")
+while [ $# -gt 0 ]
+do
+    case "$1" in 
+        (-c) CLEAN=1;;
+        (-g) DEBUG=1;;
+        (-h) usage; exit;;
+        (-u) UPDATE=1;;
+        (-l) LEAK_CHECK=1;;
+        (-j) shift; JOBS=$1;;
+        (-d) shift; FDATE=$(date -d $1);;
+        (--) shift; break;;
+        (-*) echo "$0: error - unrecognized option"; exit 1;;
+        (*)  break;;
+    esac 
+    shift
+done
+
+if [[ $FDATE && $UPDATE ]]; then
+    die "The -u and -d options are mutually exclusive"
+fi
+
+################################################################################
+# UPDATE
+################################################################################
+
+# Update from Git remote
+
+if [ "$FDATE" ]; then 
+    log "Fetching snapshot from $FDATE"
+    cd $SG && git checkout $(git rev-list -1 --before="$FDATE" next) &> "$LOG"
+    check_status
+    cd $FG && git checkout $(git rev-list -1 --before="$FDATE" next) &> "$LOG"
+    check_status
+elif [ $UPDATE -ne 0 ]; then
+    log "Updating from remote"
+    cd $SG && git checkout next &> "$LOG" && git pull &> "$LOG"
+    check_status
+    cd $FG && git checkout next &> "$LOG" && git pull &> "$LOG"
+    check_status
+fi
+
+################################################################################
+# CLEAN
+################################################################################
+
+if [ $CLEAN -ne 0 ]; then
+    log "Cleaning build directories"
+	rm -rf $SG_BUILD $FG_BUILD
+fi
+
+################################################################################
+# BUILD
+################################################################################
+
+# Recreate the build directories if necessary
+mkdir -p $SG_BUILD
+mkdir -p $FG_BUILD
+
+# Build simgear
+cd $SG_BUILD
+if [ $LEAK_CHECK -eq 0 ]; then
+    log 'Building simgear' NOTIFY
+    build "$SG"
+else
+    log 'Building simgear with leak checking' NOTIFY
+    build_with_leak_checking "$SG"
+fi
+
+# Build flightgear
+cd $FG_BUILD
+if [ $LEAK_CHECK -eq 0 ]; then
+    log 'Building flightgear' NOTIFY
+    build "$FG"
+else
+    log 'Building flightgear with leak checking' NOTIFY
+    build_with_leak_checking "$FG"
+fi
+
+log "Build complete" NOTIFY
