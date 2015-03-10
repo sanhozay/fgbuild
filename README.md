@@ -25,7 +25,7 @@ fgbuild [OPTIONS]
  -d DATE   build from DATE (MMM d YYYY)
  -g        build with debug symbols
  -j N      builds with N parallel jobs
- -l        builds with address sanitizer for leak checking.
+ -l        builds with address sanitizer for leak checking
  -u        update from current state of next (not compatible with -d)
  -h        show usage message
 </pre>
@@ -71,9 +71,9 @@ To clean and build Flightgear as it existed on a given date (for bisection):
 $ fgbuild -cd Jan 1 2015
 </pre>
 
-To build with address sanitizer for checking leaks:
+To build with address sanitizer for checking leaks and debug symbols:
 
 <pre>
-$ fgbuild -cl
+$ fgbuild -clg
 </pre>
 

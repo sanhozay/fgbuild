@@ -24,7 +24,7 @@
 # -d DATE   build from DATE (MMM d YYYY)
 # -g        build with debug symbols
 # -j N      builds with N parallel jobs
-# -l        builds with address sanitizer for leak checking.
+# -l        builds with address sanitizer for leak checking
 # -u        update from current state of next (not compatible with -d)
 # -h        show usage message
 #
@@ -57,8 +57,8 @@ function log() {
 
 function build() {
     if [ $DEBUG -ne 0 ]; then
-        COMP_FLAGS="-O3 -g"
-        LINK_FLAGS="-O3 -g"
+        COMP_FLAGS="-O2 -g"
+        LINK_FLAGS="-O2 -g"
     else
         COMP_FLAGS="-O3"
         LINK_FLAGS="-O3"
@@ -77,8 +77,13 @@ function build() {
 }
 
 function build_with_leak_checking() {
-    COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g -pthread"
-    LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g"
+    if [ $DEBUG -ne 0 ]; then
+        COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g -pthread"
+        LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O2 -g"
+    else
+        COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O3 -pthread"
+        LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O3"
+    fi
     cmake "$1" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_FLAGS="$COMP_FLAGS" \
