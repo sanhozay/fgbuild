@@ -22,7 +22,7 @@ Usage
 fgbuild [OPTIONS]
 
  -c        cleans the build directories before building
- -d DATE   build from DATE (MMM d YYYY)
+ -d DATE   build from DATE (YYYYMMDD)
  -g        build with debug symbols
  -j N      builds with N parallel jobs
  -l        builds with address sanitizer for leak checking
@@ -68,7 +68,8 @@ $ fgbuild -cg
 To clean and build Flightgear as it existed on a given date (for bisection):
 
 <pre>
-$ fgbuild -cd 'Jan 1 2015'
+$ fgbuild -cd 20141231
+$ fgbuild -cd 'Dec 31 2014'
 </pre>
 
 To build with address sanitizer for checking leaks and debug symbols:
