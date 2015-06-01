@@ -73,9 +73,9 @@ function build() {
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
     check_status
-    make -j$JOBS VERBOSE=1 install &> "$LOG"
+    make -j$JOBS VERBOSE=1 install &>> "$LOG"
     check_status
 }
 
@@ -94,9 +94,9 @@ function build_with_leak_checking() {
         -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &> "$LOG"
+        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
     check_status
-    make -j$JOBS VERBOSE=1 install &> "$LOG"
+    make -j$JOBS VERBOSE=1 install &>> "$LOG"
     check_status
 }
 
@@ -159,6 +159,8 @@ LEAK_CHECK=0
 JOBS=$(lscpu | awk '/^CPU\(s\)/ {print $2}')
 UPDATE=0
 
+cat /dev/null > "$LOG"
+
 set -- $(getopt cghulj:d: "$@")
 while [ $# -gt 0 ]
 do
@@ -189,15 +191,15 @@ fi
 
 if [ "$FDATE" ]; then 
     log "Fetching snapshot from $FDATE"
-    cd $SG && git checkout $(git rev-list -1 --before="$FDATE" next) &> "$LOG"
+    cd $SG && git checkout $(git rev-list -1 --before="$FDATE" next) &>> "$LOG"
     check_status
-    cd $FG && git checkout $(git rev-list -1 --before="$FDATE" next) &> "$LOG"
+    cd $FG && git checkout $(git rev-list -1 --before="$FDATE" next) &>> "$LOG"
     check_status
 elif [ $UPDATE -ne 0 ]; then
     log "Updating from remote"
-    cd $SG && git checkout next &> "$LOG" && git pull &> "$LOG"
+    cd $SG && git checkout next &>> "$LOG" && git pull &>> "$LOG"
     check_status
-    cd $FG && git checkout next &> "$LOG" && git pull &> "$LOG"
+    cd $FG && git checkout next &>> "$LOG" && git pull &>> "$LOG"
     check_status
 fi
 
