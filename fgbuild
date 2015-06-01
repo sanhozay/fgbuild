@@ -75,7 +75,7 @@ function build() {
         -DSIMGEAR_SHARED=ON \
         -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &> "$LOG"
     check_status
-    make -j$JOBS VERBOSE=0 install &> "$LOG"
+    make -j$JOBS VERBOSE=1 install &> "$LOG"
     check_status
 }
 
