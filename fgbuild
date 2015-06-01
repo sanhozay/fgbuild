@@ -228,8 +228,8 @@ mkdir -p $FG_BUILD
 mkdir -p $OS_BUILD
 mkdir -p $SG_BUILD
 
-# Build openscenegraph if the directory exists
-if [ -d $OS ]; then
+# Build openscenegraph if the source directory exists and not the build
+if [ -d $OS -a ! -d $OS_BUILD ]; then
     cd $OS_BUILD
     log 'Building openscenegraph' NOTIFY
     build "$OS"
