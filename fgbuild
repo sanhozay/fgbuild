@@ -183,7 +183,7 @@ do
     shift
 done
 
-if [[ $FDATE && $UPDATE ]]; then
+if [[ $FDATE && $UPDATE == 1 ]]; then
     die "The -u and -d options are mutually exclusive"
 fi
 
