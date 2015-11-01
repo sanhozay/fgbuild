@@ -225,11 +225,11 @@ fi
 
 # Recreate the build directories if necessary
 mkdir -p $FG_BUILD
-mkdir -p $OS_BUILD
 mkdir -p $SG_BUILD
 
 # Build openscenegraph if the source directory exists and not the build
 if [ -d $OS -a ! -d $OS_BUILD ]; then
+    mkdir -p $OS_BUILD
     cd $OS_BUILD
     log 'Building openscenegraph' NOTIFY
     build "$OS"
