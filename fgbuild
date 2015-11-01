@@ -32,11 +32,13 @@
 export FG=$FG_SRC/flightgear
 export OS=$FG_SRC/openscenegraph
 export SG=$FG_SRC/simgear
+export TG=$FG_SRC/terragear
 
 # Build directories
 export FG_BUILD=$FG_SRC/build/flightgear
 export OS_BUILD=$FG_SRC/build/openscenegraph
 export SG_BUILD=$FG_SRC/build/simgear
+export TG_BUILD=$FG_SRC/build/terragear
 
 # Installation directory
 export FG_INSTALL=$FG_SRC/install
@@ -211,8 +213,8 @@ fi
 # CLEAN
 ################################################################################
 
-# Only clean flightgear and simgear directories. If OSG needs rebuilding, the
-# build directory must be deleted manually
+# Only clean flightgear and simgear directories. If OSG or Terragear need
+# rebuilding, the build directory must be deleted manually
 
 if [ $CLEAN -ne 0 ]; then
     log "Cleaning build directories"
@@ -233,6 +235,14 @@ if [ -d $OS -a ! -d $OS_BUILD ]; then
     cd $OS_BUILD
     log 'Building openscenegraph' NOTIFY
     build "$OS"
+fi
+
+# Build terragear if the source directory exists and not the build
+if [ -d $TG -a ! -d $TG_BUILD ]; then
+    mkdir -p $TG_BUILD
+    cd $TG_BUILD
+    log 'Building terragear' NOTIFY
+    build "$TG"
 fi
 
 # Build simgear
