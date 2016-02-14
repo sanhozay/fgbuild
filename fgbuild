@@ -29,6 +29,7 @@
 # -h        show usage message
 #
 # Directories containing sources
+export FD=$FG_SRC/fgdata
 export FG=$FG_SRC/flightgear
 export OS=$FG_SRC/openscenegraph
 export SG=$FG_SRC/simgear
@@ -201,11 +202,15 @@ if [ "$FDATE" ]; then
     check_status
     cd $FG && git checkout $(git rev-list -1 --before="$FDATE" next) &>> "$LOG"
     check_status
+    cd $FD && git checkout $(git rev-list -1 --before="$FDATE" next) &>> "$LOG"
+    check_status
 elif [ $UPDATE -ne 0 ]; then
     log "Updating from remote"
     cd $SG && git checkout next &>> "$LOG" && git pull &>> "$LOG"
     check_status
     cd $FG && git checkout next &>> "$LOG" && git pull &>> "$LOG"
+    check_status
+    cd $FD && git checkout next &>> "$LOG" && git pull &>> "$LOG"
     check_status
 fi
 
