@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2015, Richard Senior
+# Copyright (c) 2015, 2016, Richard Senior
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 # -l        builds with address sanitizer for leak checking
 # -u        update from current state of next (not compatible with -d)
 # -h        show usage message
+# -H        show detailed usage message
 #
 # Directories containing sources
 export FD=$FG_SRC/fgdata
@@ -47,6 +48,9 @@ export FG_INSTALL=$FG_SRC/install
 # Log file for build output
 export LOG=$FG_SRC/fgbuild.log
 
+# Check whether notify-send exists
+HAVE_NOTIFY=$(command -v notify-send)
+
 ################################################################################
 # FUNCTIONS
 ################################################################################
@@ -58,7 +62,7 @@ function die() {
 
 function log() {
     echo "$(basename $0): $(date +%T): $1"
-    if [ $2 ]; then
+    if [[ $2 && $HAVE_NOTIFY ]]; then
         notify-send --icon $FG/icons/flightgear.ico "$1"    
     fi
 }
@@ -124,8 +128,8 @@ function usage() {
     echo -e "  -l     \tbuild with leak checking"
     echo -e "  -u     \tupdate before building (cannot be used with -d)"
     echo -e "  -h     \tshow help"
+    echo -e "  -H     \tshow detailed usage"
     echo ''
-    detailed_usage
 }
 
 function detailed_usage() {
@@ -168,17 +172,18 @@ UPDATE=0
 
 cat /dev/null > "$LOG"
 
-set -- $(getopt cghulj:d: "$@")
+set -- $(getopt Hcghulj:d: "$@")
 while [ $# -gt 0 ]
 do
     case "$1" in 
+        (-H) usage; detailed_usage; exit;;
         (-c) CLEAN=1;;
+        (-d) shift; FDATE=$(date -d $1);;
         (-g) DEBUG=1;;
         (-h) usage; exit;;
-        (-u) UPDATE=1;;
-        (-l) LEAK_CHECK=1;;
         (-j) shift; JOBS=$1;;
-        (-d) shift; FDATE=$(date -d $1);;
+        (-l) LEAK_CHECK=1;;
+        (-u) UPDATE=1;;
         (--) shift; break;;
         (-*) echo "$0: error - unrecognized option"; exit 1;;
         (*)  break;;
