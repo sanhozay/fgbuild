@@ -5,14 +5,16 @@ Introduction
 ------------
 
 This is a simple build script for building minimal Flightgear from source. It 
-does not deal with the downloading of source from a remote repository and it
-only compiles flightgear and simgear.
+does not deal with the initial cloning of source from a remote repository and it
+compiles flightgear, simgear, openscenegraph and terragear.
 
 It is specifically designed for users who want to build Flightgear for
 debugging purposes. You should install all the prerequisites tools and 
-libraries for building Flightgear before running this script.
+libraries for building Flightgear before running this script. You will need
+the libgoogle-perftools-dev package because linking is done against the malloc
+from that library.
 
-The script has only been tested on Ubuntu 14.04. This is beta software and
+The script has been tested on Ubuntu 15.04. This is beta software and
 you should only use it if you understand what it does.
 
 Usage
@@ -28,15 +30,16 @@ fgbuild [OPTIONS]
  -l        builds with address sanitizer for leak checking
  -u        update from current state of next (not compatible with -d)
  -h        show usage message
+ -H        show detailed usage message
 </pre>
 
 If the -j option is not supplied, the build will run with as many threads as
 you have processors or cores.
 
 Note that options that involve updating from a remote repository (-u and -d)
-will checkout the next branch in your flightgear and simgear directories. If
-you were working on another branch, they will not check it back out, or attempt
-to rebase your changes.
+will checkout the next branch in your flightgear, simgear and fgdata 
+directories. If you were working on another branch, they will not check it 
+back out, or attempt to rebase your changes.
 
 Examples
 --------

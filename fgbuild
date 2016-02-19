@@ -79,7 +79,8 @@ function build() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_FLAGS="$COMP_FLAGS" \
         -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
-        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
+        -DCMAKE_EXE_LINKER_FLAGS="-ltcmalloc" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
         -DCMAKE_VERBOSE_MAKEFILE=1 \
         -DLIB_POSTFIX="" \
         -DSIMGEAR_SHARED=ON \
