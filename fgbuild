@@ -71,10 +71,10 @@ function log() {
 
 function build() {
     if [ $DEBUG -ne 0 ]; then
-        COMP_FLAGS="-O2 -g"
-        LINK_FLAGS="-O2 -g"
+        COMP_FLAGS="-O0 -g -march=native"
+        LINK_FLAGS="-O0 -g"
     else
-        COMP_FLAGS="-O3"
+        COMP_FLAGS="-O3 -march=native"
         LINK_FLAGS="-O3"
     fi
     cmake "$1" \
