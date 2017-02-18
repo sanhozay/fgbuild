@@ -77,17 +77,20 @@ function build() {
         COMP_FLAGS="-O3 -march=native"
         LINK_FLAGS="-O3"
     fi
-    cmake "$1" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_FLAGS="$COMP_FLAGS" \
-        -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
-        -DCMAKE_EXE_LINKER_FLAGS="-ltcmalloc" \
-        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
-        -DCMAKE_VERBOSE_MAKEFILE=1 \
-        -DLIB_POSTFIX="" \
-        -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
-    check_status
+    if [ ! -d CMakeFiles ]; then
+        cmake "$1" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS="$COMP_FLAGS" \
+            -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
+            -DCMAKE_EXE_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
+            -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
+            -DCMAKE_VERBOSE_MAKEFILE=1 \
+            -DLIB_POSTFIX="" \
+            -DSIMGEAR_SHARED=OFF \
+            -DENABLE_SIMD=OFF \
+            -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
+        check_status
+    fi
     make -j$JOBS VERBOSE=1 install &>> "$LOG"
     check_status
 }
@@ -100,16 +103,20 @@ function build_with_leak_checking() {
         COMP_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O3 -pthread"
         LINK_FLAGS="-fsanitize=address -fno-omit-frame-pointer -O3"
     fi
-    cmake "$1" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_FLAGS="$COMP_FLAGS" \
-        -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
-        -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS" \
-        -DCMAKE_VERBOSE_MAKEFILE=1 \
-        -DLIB_POSTFIX="" \
-        -DSIMGEAR_SHARED=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
-    check_status
+    if [ ! -d CMakeFiles ]; then
+        cmake "$1" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS="$COMP_FLAGS" \
+            -DCMAKE_CXX_FLAGS="$COMP_FLAGS" \
+            -DCMAKE_EXE_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
+            -DCMAKE_SHARED_LINKER_FLAGS="$LINK_FLAGS -ltcmalloc" \
+            -DCMAKE_VERBOSE_MAKEFILE=1 \
+            -DLIB_POSTFIX="" \
+            -DSIMGEAR_SHARED=OFF \
+            -DENABLE_SIMD=OFF \
+            -DCMAKE_INSTALL_PREFIX:PATH="$FG_INSTALL" &>> "$LOG"
+        check_status
+    fi
     make -j$JOBS VERBOSE=1 install &>> "$LOG"
     check_status
 }
