@@ -35,12 +35,14 @@ export FG=$FG_SRC/flightgear
 export OS=$FG_SRC/openscenegraph
 export SG=$FG_SRC/simgear
 export TG=$FG_SRC/terragear
+export AM=$FG_SRC/jsbsim/utils/aeromatic++
 
 # Build directories
 export FG_BUILD=$FG_SRC/build/flightgear
 export OS_BUILD=$FG_SRC/build/openscenegraph
 export SG_BUILD=$FG_SRC/build/simgear
 export TG_BUILD=$FG_SRC/build/terragear
+export AM_BUILD=$FG_SRC/build/aeromatic++
 
 # Installation directory
 export FG_INSTALL=$FG_SRC/install
@@ -218,14 +220,16 @@ elif [ $UPDATE -ne 0 ]; then
     check_status
     cd $FD && git checkout next &>> "$LOG" && git pull &>> "$LOG"
     check_status
+    cd $AM && git checkout master &>> "$LOG" && git pull &>> "$LOG"
+    check_status
 fi
 
 ################################################################################
 # CLEAN
 ################################################################################
 
-# Only clean flightgear and simgear directories. If OSG or Terragear need
-# rebuilding, the build directory must be deleted manually
+# Only clean flightgear and simgear directories. If OSG, Aeromatic++ or
+# Terragear need rebuilding, the build directory must be deleted manually
 
 if [ $CLEAN -ne 0 ]; then
     log "Cleaning build directories"
@@ -254,6 +258,14 @@ if [ -d $TG -a ! -d $TG_BUILD ]; then
     cd $TG_BUILD
     log 'Building terragear' NOTIFY
     build "$TG"
+fi
+
+# Build Aeromatic++ if the source directory exists and not the build
+if [ -d $AM -a ! -d $AM_BUILD ]; then
+    mkdir -p $AM_BUILD
+    cd $AM_BUILD
+    log 'Building aeromatic++' NOTIFY
+    build "$AM"
 fi
 
 # Build simgear
